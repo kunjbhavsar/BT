@@ -21,7 +21,7 @@ if (($csvFile = fopen($csvFilePath, "r")) !== FALSE) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Brampton Transit - Travel Booking</title>
+    <title>Brampton Transit Car</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
@@ -82,6 +82,40 @@ if (($csvFile = fopen($csvFilePath, "r")) !== FALSE) {
             font-size: 1.5em;
             color: #cc0000;
         }
+
+        
+        .bus-animation-wrapper {
+            position: relative;
+            white-space: nowrap;
+            width: 100%;
+            overflow: hidden;
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+        }
+
+        .bus-image {
+            width: 300px;
+            height: auto;
+            margin-right: 15px;
+            vertical-align: middle;
+            animation: moveBus 7s linear infinite;
+        }
+
+        .bus-text {
+            display: inline-block;
+            font-size: 1.0em;
+        }
+
+        
+        @keyframes moveBus {
+            0% {
+                transform: translateX(100%); /* Start from the right */
+            }
+            100% {
+                transform: translateX(-100%); /* Move to the left */
+            }
+        }
     </style>
     <script>
         function startTimer(duration, display) {
@@ -112,8 +146,8 @@ if (($csvFile = fopen($csvFilePath, "r")) !== FALSE) {
 </head>
 <body>
     <div class="header">
-        <h1>Brampton Transit</h1>
-        <p>Your Ride, Your City</p>
+        <img src="BT logo.jpg" alt="Brampton Transit Logo" style="max-width: 450px; height: auto;">
+        <p><h2>Your Ride, Your City</h2></p>
     </div>
 
     <div class="content">
@@ -145,16 +179,19 @@ if (($csvFile = fopen($csvFilePath, "r")) !== FALSE) {
 
         if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['step']) && $_POST['step'] == '1') {
             if (isBusComingSoon()) {
-                echo "<p class='text-success'>A bus is arriving in less than 15 minutes. We recommend you take the bus.</p>";
+                echo "<div class='bus-animation'>
+                        <img src='BUS IS ON THE WAY.webp' class='bus-image' alt='Bus Image'>
+                        <span class='bus-text'><h5>A bus is arriving in less than 15 minutes. We recommend you take the bus.</h5></span>
+                      </div>";
             } else {
                 echo '<form method="post" action="">';
                 echo '<input type="hidden" name="step" value="2">';
                 echo '<p>The next bus is more than 15 minutes away. Would you like to:</p>';
                 echo '<div class="form-check">';
-                echo '<input class="form-check-input" type="radio" name="transport" value="Wait" required> Wait for the Bus<br>';
+                echo '<input class="form-check-input" type="radio" name="transport" value="Wait" required> Wait for the Bus.<br>';
                 echo '</div>';
                 echo '<div class="form-check">';
-                echo '<input class="form-check-input" type="radio" name="transport" value="Uber"> Take a Transit Uber<br><br>';
+                echo '<input class="form-check-input" type="radio" name="transport" value="Uber"> Take a Transit Car<br><br>';
                 echo '</div>';
                 echo '<button type="submit" class="btn btn-primary">Continue</button>';
                 echo '</form>';
@@ -164,14 +201,16 @@ if (($csvFile = fopen($csvFilePath, "r")) !== FALSE) {
             if ($transport == "Uber") {
                 echo '<form method="post" action="">';
                 echo '<input type="hidden" name="step" value="3">';
-                echo '<p>You chose to take an Uber.</p>';
                 echo '<label for="destination">Enter your destination:</label><br>';
                 echo '<input type="text" id="destination" name="destination" required class="form-control"><br>';
                 echo '<button type="submit" class="btn btn-primary">Submit</button>';
                 echo '</form>';
             } else {
 
-                echo "<p class='text-success'>Have a safe and happy journey! Your bus is on the way.</p>";
+                echo "<div class='bus-animation'>
+                    <img src='white bt bus.webp' class='bus-image' alt='Bus Image'>
+                    <span class='bus-text'><h5>Have a safe and happy journey! Your bus is on the way.</h5></span>
+                  </div>";
                 echo "<script>
                         setTimeout(function() {
                             window.location.href = 'index.php'; // Redirect to homepage after 5 seconds
@@ -181,12 +220,12 @@ if (($csvFile = fopen($csvFilePath, "r")) !== FALSE) {
         } elseif ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['step']) && $_POST['step'] == '3') {
             $destination = htmlspecialchars($_POST['destination']);
             $price = calculateCarpoolPrice($destination);
-            echo "<p>The estimated price for Transit Uber to <strong>$destination</strong> is: <strong>$$price</strong></p>";
+            echo "<p>The estimated price for Transit Car to <strong>$destination</strong> is: <strong>$$price</strong></p>";
             echo '<form method="post" action="">';
             echo '<input type="hidden" name="step" value="4">';
             echo '<input type="hidden" name="destination" value="' . htmlspecialchars($destination) . '">';
             echo '<input type="hidden" name="price" value="' . htmlspecialchars($price) . '">';
-            echo '<p>Would you like to schedule a Transit Uber for this destination?</p>';
+            echo '<p>Would you like to schedule a Transit Car for this destination?</p>';
             echo '<div class="form-check">';
             echo '<input class="form-check-input" type="radio" name="joinCarpool" value="Yes" required> Yes<br>';
             echo '</div>';
@@ -205,7 +244,7 @@ if (($csvFile = fopen($csvFilePath, "r")) !== FALSE) {
                     "price" => $price,
                     "time" => time(),
                 ];
-                echo "<p class='text-success'>You have been added to the Transit Uber queue for <strong>$destination</strong>.</p>";
+                echo "<p class='text-success'>You have been added to the Transit Car queue for <strong>$destination</strong>.</p>";
                 checkCarpoolQueue();
             } else {
 
@@ -215,7 +254,7 @@ if (($csvFile = fopen($csvFilePath, "r")) !== FALSE) {
         } else {
             echo '<form method="post" action="">';
             echo '<input type="hidden" name="step" value="1">';
-            echo '<button type="submit" class="btn btn-primary">Check Bus Availability</button>';
+            echo '<button type="submit" class="btn btn-primary">Scan Your PESTRO Check Bus Availability</button>';
             echo '</form>';
         }
 
@@ -225,7 +264,7 @@ if (($csvFile = fopen($csvFilePath, "r")) !== FALSE) {
                 return isset($user['time']) && ($currentTime - $user['time']) <= 300;
             });
             if (count($waitingUsers) >= 2) {
-                echo "<p class='text-success'>There are enough people for the carpool. Sending the Uber!</p>";
+                echo "<p class='text-success'>There are enough people for the carpool. Sending a Transit Car!</p>";
             } elseif (count($waitingUsers) == 1) {
                 echo "<p>You're the only one in the queue. Waiting for 5 more minutes...</p>";
                 echo '<div id="timer">00:00</div>';
